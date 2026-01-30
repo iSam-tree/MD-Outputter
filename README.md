@@ -1,43 +1,45 @@
-MD-Outputter
-MD-Outputter 是一款专注于高品质、专业级输出的 Markdown 转换利器。它致力于打破“屏幕截图”的低质量分享，将您的 Markdown 文档转化为具有印刷级质感的 PDF 和高清长图，适用于各种办公与社交分享场景。
+# MD-Outputter
 
-🚀 核心输出能力 (Core Output Features)
-专业 PDF 导出 (Professional PDF Export)
+Markdown 转换专家，专注于高品质、可阅读的文档输出。该工具支持将 Markdown 源码高效转化为印刷级 PDF 与高清分享长图。
 
-支持 A3、A4、A5 及 US Letter 等多种标准纸张规格。
+---
 
-内置智能分页算法，有效防止标题、图片或代码块在页面边缘被截断。
+### 🚀 核心特性
 
-支持自定义尺寸，满足从学术文档到小型手册的各种输出需求。
+* **专业 PDF 导出**：支持 A3、A4、A5 及自定义尺寸，内置智能分页算法防止内容截断。
+* **高清阅读长图**：采用 3 倍高清采样，导出时自动优化字号与行间距，确保全平台阅读舒适度。
+* **黑白反转美学**：编辑器与预览区采用高对比度反向配色，清晰界定创作与成品空间。
+* **隐私安全保障**：100% 浏览器本地处理，数据永不上传，保护您的创作隐私。
 
-全平台阅读增强长图 (Cross-Platform Readability Images)
+---
 
-高清采样：采用 3 倍超采样算法，确保文字在任何高分辨率屏幕上都清晰锐利。
+### 📖 使用指南
 
-阅读引擎：导出时自动调整字号（提升至 18px）与行间距（2.0 黄金比例），让长文阅读如同翻阅电子书般舒适。
+1. **输入**：在编辑器中输入 Markdown 文本。
+2. **预览**：实时同步查看渲染效果。
+3. **配置**：在面板选择 PDF 纸张尺寸或长图分享宽度。
+4. **输出**：一键生成并获取高品质文件副本。
 
-排版优化：优化段落间距与侧边边距，赋予长图专业、考究的版式。
+---
 
-极简视觉工具美学 (Minimalist Utility Design)
+# MD-Outputter (EN)
 
-黑白反转 Header：编辑器（高亮）与预览区（暗调）采用对比配色，清晰界定“创作”与“结果”两个空间。
+A premium Markdown converter for professional file output. This tool streamlines the process of transforming Markdown into high-quality PDFs and long-form images。
 
-物理隔离架构：采用面板隔离布局，确保界面在任何视口宽度下都稳固可靠。
+---
 
-🛠️ 技术亮点 (Technical Highlights)
-字符级溢出防护：采用最高强度的折行算法，确保长链接、表格和代码块永远锁死在容器边界内。
+### 🚀 Key Features
 
-物理架构锁定：深度优化的 Flex 布局，杜绝了标题栏在内容滚动时可能出现的位移或重叠。
+* **Pro PDF Export**: Full support for A3, A4, A5, and custom sizes with smart pagination。
+* **HD Readability Images**: Advanced 3x sampling with auto-optimized typography for an effortless reading experience.
+* **Inverted Contrast**: High-contrast header design for clear visual separation between the editor and preview.
+* **100% Private**: Local-first processing ensures your data never leaves your browser。
 
-全场景染色适配：动态主题色同步技术，确保系统组件与页面底色在深浅色模式下完美融合。
+---
 
-100% 隐私安全：所有渲染与转换逻辑均在浏览器本地完成，文档数据永不上传，绝对保护您的创作隐私。
+### 📖 Usage
 
-📖 使用指南 (How to Use)
-输入内容：在编辑器中输入或粘贴您的 Markdown 文本。
-
-实时预览：预览区即时同步渲染效果。
-
-配置参数：在侧边面板选择 PDF 纸张尺寸或长图分享宽度。
-
-一键输出：点击对应按钮，即刻获取高品质的文件副本。
+1. **Input**: Type your Markdown content into the editor。
+2. **Preview**: Real-time rendering of your formatted document.
+3. **Config**: Select your desired export size or image width.
+4. **Export**: Generate and download your professional file with one click。
