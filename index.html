@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MD2File</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        :root {
+            --bg: #f8f9fa;
+            --sidebar-bg: #ffffff;
+            --pane-bg: #ffffff;
+            --text: #1a1a1a;
+            --text-sec: #666;
+            --border: rgba(0, 0, 0, 0.08);
+            --btn-main: #1a1a1a;
+            --btn-main-text: #ffffff;
+        }
+
+        [data-theme="dark"] {
+            --bg: #121212;
+            --sidebar-bg: #1e1e1e;
+            --pane-bg: #252525;
+            --text: #e0e0e0;
+            --text-sec: #aaa;
+            --border: rgba(255, 255, 255, 0.1);
+            --btn-main: #f0f0f0;
+            --btn-main-text: #1a1a1a;
+        }
+
+        body {
+            margin: 0; font-family: -apple-system, system-ui, sans-serif;
+            background: var(--bg); color: var(--text);
+            transition: background 0.3s, color 0.3s;
+        }
+
+        .app-container { display: flex; height: 100vh; width: 100vw; overflow: hidden; }
+
+        .sidebar {
+            width: 280px; background: var(--sidebar-bg); border-right: 1px solid var(--border);
+            padding: 24px; display: flex; flex-direction: column; gap: 18px; flex-shrink: 0;
+            box-sizing: border-box; overflow-y: auto;
+        }
+
+        .header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .brand { font-size: 1.5rem; font-weight: 800; letter-spacing: -1px; }
+        .top-tools { display: flex; gap: 8px; }
+        .icon-btn { 
+            background: none; border: 1px solid var(--border); border-radius: 6px; 
+            cursor: pointer; padding: 4px 8px; color: var(--text); font-size: 12px;
+        }
+
+        .control-item { display: flex; flex-direction: column; gap: 6px; }
+        label { font-size: 11px; font-weight: 700; color: var(--text-sec); text-transform: uppercase; }
+
+        select, input {
+            padding: 10px; border: 1px solid var(--border); border-radius: 8px;
+            font-size: 14px; outline: none; background: var(--pane-bg); color: var(--text);
+        }
+
+        .btn {
+            padding: 12px; border: none; border-radius: 8px; cursor: pointer;
+            font-weight: 600; font-size: 14px; transition: 0.2s;
+        }
+        .btn-pdf { background: var(--btn-main); color: var(--btn-main-text); }
+        .btn-img { background: transparent; border: 1px solid var(--btn-main); color: var(--text); }
+
+        .content-area { flex: 1; display: flex; padding: 15px; gap: 15px; box-sizing: border-box; }
+        .pane {
+            flex: 1; display: flex; flex-direction: column; background: var(--pane-bg);
+            border-radius: 12px; border: 1px solid var(--border); overflow: hidden;
+        }
+        .pane-head {
+            padding: 10px 16px; background: rgba(0,0,0,0.02); border-bottom: 1px solid var(--border);
+            font-size: 10px; font-weight: 700; color: var(--text-sec); letter-spacing: 1px;
+        }
+
+        textarea {
+            flex: 1; padding: 20px; border: none; resize: none; outline: none;
+            font-family: 'Fira Code', monospace; font-size: 14px; line-height: 1.6;
+            background: transparent; color: var(--text);
+        }
+
+        #preview { flex: 1; padding: 35px; overflow-y: auto; background: var(--pane-bg); line-height: 1.7; color: var(--text); }
+
+        @media (max-width: 850px) {
+            .app-container { flex-direction: column; height: auto; overflow: visible; }
+            .sidebar { width: 100%; border-right: none; border-bottom: 1px solid var(--border); }
+            .content-area { flex-direction: column; height: auto; padding: 10px; }
+            .pane { height: 450px; }
+        }
+
+        #preview h1 { border-bottom: 2px solid var(--border); padding-bottom: 10px; }
+        #preview code { background: rgba(0,0,0,0.05); padding: 2px 4px; border-radius: 4px; }
+        [data-theme="dark"] #preview code { background: rgba(255,255,255,0.1); }
+        .clone-hidden { position: absolute; left: -9999px; top: 0; height: auto !important; }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <aside class="sidebar">
+        <div class="header-row">
+            <div class="brand">MD2File</div>
+            <div class="top-tools">
+                <button class="icon-btn" onclick="toggleLang()" id="lang-btn">EN</button>
+                <button class="icon-btn" onclick="toggleTheme()" id="theme-btn">🌙</button>
+            </div>
+        </div>
+        
+        <div class="control-item">
+            <label id="label-pdf-size">PDF 尺寸</label>
+            <select id="pdf-size" onchange="checkCustom()"></select>
+            <div id="custom-pdf" style="display:none; gap:5px; margin-top:5px;">
+                <input type="number" id="pw" placeholder="W" value="210">
+                <input type="number" id="ph" placeholder="H" value="297">
+            </div>
+            <button class="btn btn-pdf" onclick="exportPDF()" id="btn-pdf">导出 PDF</button>
+        </div>
+
+        <hr style="border: 0; border-top: 1px solid var(--border); margin: 5px 0;">
+
+        <div class="control-item">
+            <label id="label-img-size">图片 / 社媒尺寸</label>
+            <select id="img-size"></select>
+            <button class="btn btn-img" onclick="exportImage()" id="btn-img">导出长图</button>
+        </div>
+    </aside>
+
+    <main class="content-area">
+        <div class="pane">
+            <div class="pane-head" id="head-editor">编辑器</div>
+            <textarea id="input" oninput="update()" spellcheck="false"></textarea>
+        </div>
+        <div class="pane">
+            <div class="pane-head" id="head-preview">预览区</div>
+            <div id="preview"></div>
+        </div>
+    </main>
+</div>
+
+<script>
+    const inputEl = document.getElementById('input');
+    const previewEl = document.getElementById('preview');
+    const pdfSelect = document.getElementById('pdf-size');
+    const imgSelect = document.getElementById('img-size');
+
+    const i18n = {
+        zh: {
+            pdfSize: "PDF 尺寸", exportPdf: "导出 PDF",
+            imgSize: "图片 / 社媒尺寸", exportImg: "导出长图",
+            editor: "编辑器", preview: "预览区", custom: "自定义...",
+            pdfOptions: [
+                { val: "A4", text: "A4 打印纸 (210x297mm)" },
+                { val: "A5", text: "A5 手册 (148x210mm)" },
+                { val: "Letter", text: "信纸 (216x279mm)" },
+                { val: "custom", text: "自定义尺寸..." }
+            ],
+            imgOptions: [
+                { group: "手机设备", items: [
+                    { val: "360", text: "标准手机宽度 (360px)" },
+                    { val: "412", text: "大屏手机宽度 (412px)" },
+                    { val: "820", text: "平板宽度 (820px)" }
+                ]},
+                { group: "社交媒体", items: [
+                    { val: "1080", text: "Instagram / 微信 (1080px)" },
+                    { val: "1200", text: "X / Twitter (1200px)" },
+                    { val: "1500", text: "微博 / 小红书 (1500px)" }
+                ]}
+            ],
+            defaultText: "# MD2File\n\n## 欢迎使用\n这是一个支持多端适配、暗色模式的 Markdown 导出工具。\n\n### 特性\n- **中英文切换**：支持菜单与内容的智能翻译。\n- **暗色模式**：点击上方月亮图标切换主题。\n- **智能命名**：自动抓取首行标题作为文件名。"
+        },
+        en: {
+            pdfSize: "PDF SIZE", exportPdf: "Export PDF",
+            imgSize: "IMAGE / SOCIAL SIZE", exportImg: "Export Image",
+            editor: "EDITOR", preview: "PREVIEW", custom: "Custom...",
+            pdfOptions: [
+                { val: "A4", text: "A4 Paper (210x297mm)" },
+                { val: "A5", text: "A5 Leaflet (148x210mm)" },
+                { val: "Letter", text: "US Letter (216x279mm)" },
+                { val: "custom", text: "Custom Size..." }
+            ],
+            imgOptions: [
+                { group: "Phones & Tablets", items: [
+                    { val: "360", text: "Standard Mobile (360px)" },
+                    { val: "412", text: "Large Mobile (412px)" },
+                    { val: "820", text: "Tablet (820px)" }
+                ]},
+                { group: "Social Media", items: [
+                    { val: "1080", text: "Instagram / WeChat (1080px)" },
+                    { val: "1200", text: "X / Twitter (1200px)" },
+                    { val: "1500", text: "Weibo / Red (1500px)" }
+                ]}
+            ],
+            defaultText: "# MD2File\n\n## Welcome\nThis is a lightweight Markdown exporter with dark mode and responsive design.\n\n### Features\n- **Bilingual**: Menu and content switch intelligently.\n- **Dark Mode**: Toggle theme via the moon icon.\n- **Smart Naming**: Filename is auto-generated from the first line."
+        }
+    };
+
+    let currentLang = 'zh';
+
+    function update() { previewEl.innerHTML = marked.parse(inputEl.value); }
+
+    function toggleTheme() {
+        const body = document.body;
+        const isDark = body.getAttribute('data-theme') === 'dark';
+        body.setAttribute('data-theme', isDark ? 'light' : 'dark');
+        document.getElementById('theme-btn').innerText = isDark ? '🌙' : '☀️';
+    }
+
+    function renderSelects() {
+        const lang = i18n[currentLang];
+        // PDF Select
+        pdfSelect.innerHTML = lang.pdfOptions.map(o => `<option value="${o.val}">${o.text}</option>`).join('');
+        // Img Select
+        imgSelect.innerHTML = lang.imgOptions.map(g => `
+            <optgroup label="${g.group}">
+                ${g.items.map(i => `<option value="${i.val}">${i.text}</option>`).join('')}
+            </optgroup>
+        `).join('');
+    }
+
+    function toggleLang() {
+        const oldDefault = i18n[currentLang].defaultText;
+        currentLang = currentLang === 'zh' ? 'en' : 'zh';
+        const lang = i18n[currentLang];
+        
+        // 更新 UI 文字
+        document.getElementById('lang-btn').innerText = currentLang === 'zh' ? 'EN' : '中文';
+        document.getElementById('label-pdf-size').innerText = lang.pdfSize;
+        document.getElementById('btn-pdf').innerText = lang.exportPdf;
+        document.getElementById('label-img-size').innerText = lang.imgSize;
+        document.getElementById('btn-img').innerText = lang.exportImg;
+        document.getElementById('head-editor').innerText = lang.editor;
+        document.getElementById('head-preview').innerText = lang.preview;
+        
+        // 更新下拉菜单
+        renderSelects();
+        
+        // 智能更新编辑器内容
+        if (inputEl.value.trim() === "" || inputEl.value === oldDefault) {
+            inputEl.value = lang.defaultText;
+            update();
+        }
+    }
+
+    function checkCustom() {
+        document.getElementById('custom-pdf').style.display = pdfSelect.value === 'custom' ? 'flex' : 'none';
+    }
+
+    function getName(ext, res) {
+        const first = inputEl.value.split('\n').find(l => l.trim()) || 'Untitled';
+        const name = first.replace(/[#*`>]/g, '').trim().substring(0, 20).replace(/[/\\?%*:|"<>]/g, '');
+        return `${name}_${res}.${ext}`;
+    }
+
+    async function exportPDF() {
+        const pdfSizes = { 'A4': [210, 297], 'A5': [148, 210], 'Letter': [216, 279] };
+        const sel = pdfSelect.value;
+        const w = sel === 'custom' ? document.getElementById('pw').value : pdfSizes[sel][0];
+        const h = sel === 'custom' ? document.getElementById('ph').value : pdfSizes[sel][1];
+        
+        const opt = {
+            margin: 10, filename: getName('pdf', `${w}x${h}mm`),
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
+            jsPDF: { unit: 'mm', format: [w, h], orientation: w > h ? 'l' : 'p' }
+        };
+        html2pdf().set(opt).from(previewEl).save();
+    }
+
+    async function exportImage() {
+        const w = imgSelect.value;
+        const btn = document.getElementById('btn-img');
+        const currentBg = getComputedStyle(document.documentElement).getPropertyValue('--pane-bg');
+        
+        const clone = previewEl.cloneNode(true);
+        clone.classList.add('clone-hidden');
+        clone.style.width = w + 'px';
+        clone.style.background = currentBg;
+        document.body.appendChild(clone);
+
+        await new Promise(r => setTimeout(r, 400));
+        const canvas = await html2canvas(clone, { scale: 2, useCORS: true, backgroundColor: currentBg.trim() });
+        
+        const link = document.createElement('a');
+        link.download = getName('png', `${w}px`);
+        link.href = canvas.toDataURL();
+        link.click();
+        document.body.removeChild(clone);
+    }
+
+    // 初始化
+    renderSelects();
+    inputEl.value = i18n.zh.defaultText;
+    update();
+</script>
+</body>
+</html>
