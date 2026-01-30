@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>MD2File</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -15,7 +15,6 @@
             --pane-bg: rgba(255, 255, 255, 0.45);
             --text: #1d1d1f;
             --border: rgba(0, 0, 0, 0.1);
-            /* 浅色模式配色 */
             --head-edit-bg: #ffffff; --head-edit-text: #000000;
             --head-view-bg: #000000; --head-view-text: #ffffff;
             --shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
@@ -27,19 +26,23 @@
             --pane-bg: rgba(44, 44, 46, 0.45);
             --text: #f5f5f7;
             --border: rgba(255, 255, 255, 0.12);
-            /* 深色模式反转配色 */
             --head-edit-bg: #1c1c1e; --head-edit-text: #ffffff;
             --head-view-bg: #ffffff; --head-view-text: #000000;
             --shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
         }
 
         * { box-sizing: border-box; }
-        body { margin: 0; font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; }
+        
+        html, body { 
+            background-color: var(--bg); 
+            margin: 0; height: 100%; width: 100%; 
+            transition: background-color 0.3s;
+        }
 
-        /* 物理隔离架构 - 根容器 */
+        body { font-family: -apple-system, system-ui, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", sans-serif; color: var(--text); overflow: hidden; }
+
         .app-container { display: flex; height: 100vh; width: 100vw; align-items: stretch; overflow: hidden; }
 
-        /* 设置面板 */
         .sidebar {
             width: 280px; background: var(--sidebar-bg); backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px);
             border-right: 1px solid var(--border); padding: 32px 24px; display: flex; flex-direction: column; gap: 24px; flex-shrink: 0;
@@ -51,7 +54,7 @@
         .icon-btn { 
             background: var(--pane-bg); border: 1px solid var(--border); border-radius: 50%; 
             width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
-            cursor: pointer; color: var(--text); font-weight: 600; font-size: 12px; transition: 0.2s;
+            cursor: pointer; color: var(--text); font-weight: 600; font-size: 12px;
         }
 
         .control-item { display: flex; flex-direction: column; gap: 8px; }
@@ -61,10 +64,8 @@
         .btn-pdf { background: var(--text); color: var(--bg); }
         .btn-img { background: transparent; border: 1.5px solid var(--text); color: var(--text); }
 
-        /* 内容展示区 - 物理锁定高度 */
-        .content-area { flex: 1; display: flex; padding: 24px; gap: 24px; align-items: stretch; overflow: hidden; height: 100vh; }
+        .content-area { flex: 1; display: flex; padding: 24px; gap: 24px; align-items: stretch; overflow: hidden; height: 100%; }
         
-        /* 面板容器 */
         .pane {
             flex: 1; min-width: 0; display: flex; flex-direction: column; 
             background: var(--pane-bg); border-radius: 24px; border: 1px solid var(--border);
@@ -72,7 +73,6 @@
             box-shadow: var(--shadow); overflow: hidden;
         }
 
-        /* 物理标题栏：锁定在面板顶部 */
         .pane-head {
             height: 48px; flex-shrink: 0; padding: 0 24px; font-size: 11px; font-weight: 700;
             display: flex; justify-content: space-between; align-items: center;
@@ -82,38 +82,48 @@
         .head-view { background: var(--head-view-bg); color: var(--head-view-text); }
         .clear-btn { background: none; border: none; color: inherit; opacity: 0.6; cursor: pointer; font-size: 11px; font-weight: 600; }
 
-        /* 核心修复：确保内部区域撑满 */
-        .pane-body { flex: 1; display: flex; flex-direction: column; overflow: hidden; height: 100%; position: relative; }
+        .pane-body { flex: 1; display: flex; flex-direction: column; overflow: hidden; height: 100%; min-width: 0; position: relative; }
 
         textarea, #preview-scroll { 
             flex: 1; width: 100%; height: 100%; padding: 32px; 
-            background: transparent; overflow-y: auto; 
+            background: transparent; overflow-y: auto; overflow-x: hidden;
         }
         textarea { border: none; resize: none; outline: none; font-family: "SF Mono", monospace; font-size: 14px; line-height: 1.6; color: var(--text); }
         
-        /* 预览区溢出修复逻辑 */
-        
+        /* 预览区基础样式 */
         #preview-inner { 
             line-height: 1.8; 
-            word-wrap: break-word; 
-            word-break: break-word; 
-            overflow-wrap: anywhere; /* 现代浏览器最高强度换行 */
-            max-width: 100%;
-            overflow-x: hidden;
+            overflow-wrap: anywhere; word-wrap: break-word; word-break: break-all;
+            width: 100%; max-width: 100%;
+            padding-bottom: 100px;
         }
+
+        /* 导出时的可读性增强样式 */
+        .export-mode {
+            font-size: 18px !important;
+            line-height: 2.0 !important;
+            padding: 40px 48px !important; /* 增加长图侧边距 */
+        }
+        .export-mode h1, .export-mode h2, .export-mode h3 { margin-top: 1.8em !important; margin-bottom: 0.8em !important; }
+        .export-mode p { margin-bottom: 1.2em !important; }
+
+        #preview-inner img, #preview-inner table { max-width: 100% !important; height: auto !important; }
+        #preview-inner table { table-layout: fixed; border-collapse: collapse; width: 100%; }
+        #preview-inner td, #preview-inner th { border: 1px solid var(--border); padding: 8px; }
+        #preview-inner pre { white-space: pre-wrap !important; word-break: break-all !important; background: rgba(0,0,0,0.05); padding: 15px; border-radius: 12px; }
 
         @media (max-width: 850px) {
             body { overflow-y: auto; height: auto; }
             .app-container { flex-direction: column; height: auto; overflow: visible; }
             .sidebar { width: 100%; position: sticky; top: 0; z-index: 100; border-right: none; padding: 20px; height: auto; border-bottom: 1px solid var(--border); }
             .content-area { flex-direction: column; height: auto; padding: 16px; gap: 16px; overflow: visible; }
-            .pane { height: 75vh; min-height: 520px; flex: none; overflow: visible; border-radius: 20px; }
+            .pane { height: auto; min-height: 520px; flex: none; overflow: visible; border-radius: 20px; }
             .pane-head { position: sticky; top: 78px; z-index: 90; border-radius: 20px 20px 0 0; } 
             .pane-body { overflow: visible; height: auto; }
             textarea, #preview-scroll { padding: 24px; font-size: 16px; overflow: visible; height: auto; }
         }
 
-        .clone-hidden { position: absolute; left: -9999px; top: 0; height: auto !important; width: auto; }
+        .clone-hidden { position: absolute; left: -9999px; top: 0; height: auto !important; width: auto; z-index: -1; }
     </style>
 </head>
 <body>
@@ -128,7 +138,7 @@
             </div>
         </div>
         <div class="control-item">
-            <label id="label-pdf">PDF 导出尺寸</label>
+            <label id="label-pdf">PDF 尺寸</label>
             <select id="pdf-size" onchange="checkCustom()"></select>
             <div id="custom-pdf" style="display:none; gap:5px; margin-top:5px;">
                 <input type="number" id="pw" value="210">
@@ -137,9 +147,9 @@
             <button class="btn btn-pdf" onclick="exportPDF()" id="btn-pdf">导出 PDF</button>
         </div>
         <div class="control-item">
-            <label id="label-img">图片分享宽度</label>
+            <label id="label-img">长图分享宽度</label>
             <select id="img-size"></select>
-            <button class="btn btn-img" onclick="exportImage()" id="btn-img">导出图片</button>
+            <button class="btn btn-img" onclick="exportImage()" id="btn-img">导出长图</button>
         </div>
     </aside>
 
@@ -172,32 +182,32 @@
 
     const i18n = {
         zh: {
-            pdfSize: "PDF 导出尺寸", exportPdf: "导出 PDF", imgSize: "图片分享宽度", exportImg: "导出图片",
-            editor: "编辑器", preview: "预览区", clear: "清空", custom: "自定义...", nextLang: "EN",
+            pdfSize: "PDF 尺寸", exportPdf: "导出 PDF", imgSize: "图片分享宽度", exportImg: "导出长图",
+            editor: "编辑器", preview: "预览区", clear: "清空", custom: "自定义规格...", nextLang: "EN",
             pdfOptions: [
                 { val: "A4", text: "A4 标准 (210x297mm)" }, { val: "A3", text: "A3 展示 (297x420mm)" },
-                { val: "A5", text: "A5 手册 (148x210mm)" }, { val: "Letter", text: "US Letter (216x279mm)" },
+                { val: "A5", text: "A5 手册 (148x210mm)" }, { val: "Letter", text: "US Letter" },
                 { val: "custom", text: "自定义规格..." }
             ],
             imgOptions: [
-                { group: "设备模拟", items: [{ val: "375", text: "标准手机 (375px)" }, { val: "414", text: "手机大屏 (414px)" }, { val: "820", text: "平板宽度 (820px)" }]},
-                { group: "社交媒体", items: [{ val: "1080", text: "微信 / IG (1080px)" }, { val: "1242", text: "高清长图 (1242px)" }, { val: "1500", text: "微博 / 小红书 (1500px)" }]}
+                { group: "移动设备模拟", items: [{ val: "375", text: "标准手机 (375px)" }, { val: "414", text: "手机大屏 (414px)" }, { val: "820", text: "平板宽度 (820px)" }]},
+                { group: "社交媒体分享", items: [{ val: "1080", text: "微信 / IG (1080px)" }, { val: "1242", text: "高清长图 (1242px)" }, { val: "1500", text: "微博 / 小红书 (1500px)" }]}
             ],
-            defaultText: "# MD2File 使用指南\n\n这是一个纯本地运行的 Markdown 转换工具。\n\n### 🚀 核心功能提示\n\n1. **导出 PDF**：在设置面板选择预设尺寸，支持智能分页防止内容截断。\n2. **导出长图**：3 倍高清采样算法，确保文字在任何设备上都清晰锐利。\n3. **吸顶导航**：在移动端滑动时，标题栏会顺次锁定在顶部，永远清晰定位当前区域。\n4. **黑白反转**：编辑器与预览区采用高对比度反向设计，便于视觉区分。\n5. **隐私安全**：100% 浏览器内处理。代码不含后端，您的文档永不上传。"
+            defaultText: "# MD2File Pro\n\n### 🚀 移动端阅读优化版\n\n1. **高清易读性**：导出长图时自动增大字号并优化行间距，确保手机全屏阅读不费力。\n2. **黑白反转 Header**：编辑器与预览区采用高对比度设计，物理隔离架构彻底杜绝标题栏漂移。\n3. **Safari 完美兼容**：解决了底部黑白条问题，导出图片强制白底，解决透明度导致的灰底 Bug。\n4. **全尺寸预设**：补全了 A3/A4/A5 及各类主流社媒宽度预设。\n5. **隐私安全**：100% 浏览器本地处理，数据永不上传。"
         },
         en: {
             pdfSize: "PDF SIZE", exportPdf: "EXPORT PDF", imgSize: "IMAGE WIDTH", exportImg: "EXPORT IMAGE",
-            editor: "EDITOR", preview: "PREVIEW", clear: "CLEAR", custom: "Custom...", nextLang: "中",
+            editor: "EDITOR", preview: "PREVIEW", clear: "CLEAR ALL", custom: "Custom...", nextLang: "中",
             pdfOptions: [
                 { val: "A4", text: "A4 Standard" }, { val: "A3", text: "A3 Display" },
                 { val: "A5", text: "A5 Booklet" }, { val: "Letter", text: "US Letter" },
-                { val: "custom", text: "Custom Dimensions..." }
+                { val: "custom", text: "Custom..." }
             ],
             imgOptions: [
-                { group: "Mobile", items: [{ val: "375", text: "Standard (375px)" }, { val: "414", text: "Large (414px)" }, { val: "820", text: "Tablet (820px)" }]},
-                { group: "Social", items: [{ val: "1080", text: "Instagram (1080px)" }, { val: "1242", text: "High Res (1242px)" }, { val: "1500", text: "Social Feed (1500px)" }]}
+                { group: "Mobile Simulation", items: [{ val: "375", text: "Standard (375px)" }, { val: "414", text: "Large (414px)" }, { val: "820", text: "Tablet (820px)" }]},
+                { group: "Social Media", items: [{ val: "1080", text: "Instagram / WeChat (1080px)" }, { val: "1242", text: "High Res Long (1242px)" }, { val: "1500", text: "Social Feed (1500px)" }]}
             ],
-            defaultText: "# MD2File Guide\n\nA lightweight, local-first Markdown converter.\n\n### 🚀 Highlights\n\n1. **Export PDF**: Select presets in the control panel. Smart pagination prevents text clipping.\n2. **Export Image**: 3x HD sampling ensures every word is crisp on any device.\n3. **Sticky Headers**: Headers lock at the top on mobile for easy navigation.\n4. **Inverted Contrast**: Editor and Preview use inverted schemes for clear separation.\n5. **Local Privacy**: 100% client-side processing. Your data never leaves your browser."
+            defaultText: "# MD2File Guide\n\n### 🚀 Mobile Readability Optimized\n\n1. **Enhanced Typography**: Auto-enlarges font and line spacing during image export for effortless mobile reading.\n2. **Inverted Contrast Headers**: High-contrast physical isolation architecture prevents header drifting.\n3. **Safari Compatible**: Fixed bottom bar issues and transparency bugs for perfect image exports.\n4. **All Presets Included**: Restored A3, A4, A5, and major social media widths.\n5. **100% Local**: Processed entirely in your browser. Absolute privacy guaranteed."
         }
     };
 
@@ -239,22 +249,35 @@
         const opt = { margin: 12, filename: 'MD2File_Export.pdf', image: { type: 'jpeg', quality: 1 }, html2canvas: { scale: 3, useCORS: true, scrollY: 0 }, jsPDF: { unit: 'mm', format: [w, h], orientation: 'p' }, pagebreak: { mode: ['avoid-all', 'css'] } };
         html2pdf().set(opt).from(previewEl).save();
     }
+    
     async function exportImage() {
         const w = imgSelect.value;
-        const currentBg = getComputedStyle(document.documentElement).getPropertyValue('--pane-bg');
+        const isDark = document.body.getAttribute('data-theme') === 'dark';
+        const exportBgColor = isDark ? '#1c1c1e' : '#ffffff'; 
+        
+        // 创建用于导出的克隆
         const clone = previewEl.cloneNode(true);
         clone.classList.add('clone-hidden');
+        clone.classList.add('export-mode'); // 核心：注入阅读增强模式类
         clone.style.width = w + 'px';
-        clone.style.background = currentBg;
+        clone.style.background = exportBgColor; 
+        clone.style.color = isDark ? '#f5f5f7' : '#1d1d1f';
         document.body.appendChild(clone);
+        
         await new Promise(r => setTimeout(r, 600));
-        const canvas = await html2canvas(clone, { scale: 3, useCORS: true, backgroundColor: currentBg.trim() });
+        const canvas = await html2canvas(clone, { 
+            scale: 3, 
+            useCORS: true, 
+            backgroundColor: exportBgColor 
+        });
+        
         const link = document.createElement('a');
         link.download = 'MD2File_Image.png';
         link.href = canvas.toDataURL('image/png');
         link.click();
         document.body.removeChild(clone);
     }
+    
     function clearContent() { if(confirm(currentLang === 'zh' ? "确定清空内容？" : "Clear content?")) { inputEl.value = ""; update(); } }
     function checkCustom() { document.getElementById('custom-pdf').style.display = pdfSelect.value === 'custom' ? 'flex' : 'none'; }
     renderUI();
