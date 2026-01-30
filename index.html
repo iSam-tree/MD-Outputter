@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>MD2File</title>
+    <title>MD-Outputter</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -90,7 +90,6 @@
         }
         textarea { border: none; resize: none; outline: none; font-family: "SF Mono", monospace; font-size: 14px; line-height: 1.6; color: var(--text); }
         
-        /* 预览区基础样式 */
         #preview-inner { 
             line-height: 1.8; 
             overflow-wrap: anywhere; word-wrap: break-word; word-break: break-all;
@@ -98,11 +97,10 @@
             padding-bottom: 100px;
         }
 
-        /* 导出时的可读性增强样式 */
         .export-mode {
             font-size: 18px !important;
             line-height: 2.0 !important;
-            padding: 40px 48px !important; /* 增加长图侧边距 */
+            padding: 40px 48px !important;
         }
         .export-mode h1, .export-mode h2, .export-mode h3 { margin-top: 1.8em !important; margin-bottom: 0.8em !important; }
         .export-mode p { margin-bottom: 1.2em !important; }
@@ -131,7 +129,7 @@
 <div class="app-container">
     <aside class="sidebar">
         <div class="header-row">
-            <div class="brand">MD2File</div>
+            <div class="brand">MD-Outputter</div>
             <div class="top-tools">
                 <button class="icon-btn" onclick="toggleLang()" id="lang-btn">EN</button>
                 <button class="icon-btn" onclick="toggleTheme()" id="theme-btn">🌙</button>
@@ -190,24 +188,24 @@
                 { val: "custom", text: "自定义规格..." }
             ],
             imgOptions: [
-                { group: "移动设备模拟", items: [{ val: "375", text: "标准手机 (375px)" }, { val: "414", text: "手机大屏 (414px)" }, { val: "820", text: "平板宽度 (820px)" }]},
-                { group: "社交媒体分享", items: [{ val: "1080", text: "微信 / IG (1080px)" }, { val: "1242", text: "高清长图 (1242px)" }, { val: "1500", text: "微博 / 小红书 (1500px)" }]}
+                { group: "设备模拟", items: [{ val: "375", text: "手机宽度 (375px)" }, { val: "414", text: "手机大屏 (414px)" }, { val: "820", text: "平板模式 (820px)" }]},
+                { group: "社交分享", items: [{ val: "1080", text: "微信 / IG (1080px)" }, { val: "1242", text: "高清长图 (1242px)" }, { val: "1500", text: "微博 / 小红书 (1500px)" }]}
             ],
-            defaultText: "# MD2File Pro\n\n### 🚀 移动端阅读优化版\n\n1. **高清易读性**：导出长图时自动增大字号并优化行间距，确保手机全屏阅读不费力。\n2. **黑白反转 Header**：编辑器与预览区采用高对比度设计，物理隔离架构彻底杜绝标题栏漂移。\n3. **Safari 完美兼容**：解决了底部黑白条问题，导出图片强制白底，解决透明度导致的灰底 Bug。\n4. **全尺寸预设**：补全了 A3/A4/A5 及各类主流社媒宽度预设。\n5. **隐私安全**：100% 浏览器本地处理，数据永不上传。"
+            defaultText: "# MD-Outputter\n\nMarkdown 转换专家，专注于高品质、可阅读的文档输出。\n\n### 🚀 核心输出特性\n\n1. **极速导出 PDF**：支持标准纸张尺寸与自定义规格。内置智能分页算法，确保标题与代码块不被截断。\n2. **高清长图转换**：3倍高清采样算法。导出时自动优化字号与行间距，确保移动端全屏阅读极致舒适。\n3. **黑白反转美学**：沉浸式编辑器与成品预览区采用高对比度反向设计，视觉焦点更清晰。\n4. **物理架构锁死**：采用隔离布局，确保标题栏在任何屏幕尺寸下都锁定在正确位置，拒绝漂移。\n5. **隐私安全保障**：100% 浏览器本地处理，您的文档数据永不离开本地环境。"
         },
         en: {
             pdfSize: "PDF SIZE", exportPdf: "EXPORT PDF", imgSize: "IMAGE WIDTH", exportImg: "EXPORT IMAGE",
-            editor: "EDITOR", preview: "PREVIEW", clear: "CLEAR ALL", custom: "Custom...", nextLang: "中",
+            editor: "EDITOR", preview: "PREVIEW", clear: "CLEAR", custom: "Custom...", nextLang: "中",
             pdfOptions: [
                 { val: "A4", text: "A4 Standard" }, { val: "A3", text: "A3 Display" },
                 { val: "A5", text: "A5 Booklet" }, { val: "Letter", text: "US Letter" },
                 { val: "custom", text: "Custom..." }
             ],
             imgOptions: [
-                { group: "Mobile Simulation", items: [{ val: "375", text: "Standard (375px)" }, { val: "414", text: "Large (414px)" }, { val: "820", text: "Tablet (820px)" }]},
-                { group: "Social Media", items: [{ val: "1080", text: "Instagram / WeChat (1080px)" }, { val: "1242", text: "High Res Long (1242px)" }, { val: "1500", text: "Social Feed (1500px)" }]}
+                { group: "Mobile", items: [{ val: "375", text: "Standard (375px)" }, { val: "414", text: "Large Screen (414px)" }, { val: "820", text: "Tablet (820px)" }]},
+                { group: "Social", items: [{ val: "1080", text: "Instagram (1080px)" }, { val: "1242", text: "High Res (1242px)" }, { val: "1500", text: "Social Feed (1500px)" }]}
             ],
-            defaultText: "# MD2File Guide\n\n### 🚀 Mobile Readability Optimized\n\n1. **Enhanced Typography**: Auto-enlarges font and line spacing during image export for effortless mobile reading.\n2. **Inverted Contrast Headers**: High-contrast physical isolation architecture prevents header drifting.\n3. **Safari Compatible**: Fixed bottom bar issues and transparency bugs for perfect image exports.\n4. **All Presets Included**: Restored A3, A4, A5, and major social media widths.\n5. **100% Local**: Processed entirely in your browser. Absolute privacy guaranteed."
+            defaultText: "# MD-Outputter\n\nThe premium Markdown converter for high-quality file output.\n\n### 🚀 Key Features\n\n1. **Swift PDF Export**: Full support for A3/A4/A5 and custom sizes. Smart pagination prevents content clipping.\n2. **HD Image Output**: Advanced 3x sampling. Automatically optimizes font size and vertical rhythm for flawless mobile reading.\n3. **Inverted Contrast**: Visual separation with contrast-based headers ensures a focused writing and preview experience.\n4. **Robust Architecture**: Physical isolation keeps headers perfectly locked across all window widths.\n5. **Absolute Privacy**: 100% client-side processing. Your data never leaves your browser."
         }
     };
 
@@ -246,38 +244,28 @@
         const pdfS = { 'A4': [210, 297], 'A3': [297, 420], 'A5': [148, 210], 'Letter': [216, 279] };
         const w = sel === 'custom' ? document.getElementById('pw').value : pdfS[sel][0];
         const h = sel === 'custom' ? document.getElementById('ph').value : pdfS[sel][1];
-        const opt = { margin: 12, filename: 'MD2File_Export.pdf', image: { type: 'jpeg', quality: 1 }, html2canvas: { scale: 3, useCORS: true, scrollY: 0 }, jsPDF: { unit: 'mm', format: [w, h], orientation: 'p' }, pagebreak: { mode: ['avoid-all', 'css'] } };
+        const opt = { margin: 12, filename: 'MD-Outputter_Export.pdf', image: { type: 'jpeg', quality: 1 }, html2canvas: { scale: 3, useCORS: true, scrollY: 0 }, jsPDF: { unit: 'mm', format: [w, h], orientation: 'p' }, pagebreak: { mode: ['avoid-all', 'css'] } };
         html2pdf().set(opt).from(previewEl).save();
     }
-    
     async function exportImage() {
         const w = imgSelect.value;
         const isDark = document.body.getAttribute('data-theme') === 'dark';
         const exportBgColor = isDark ? '#1c1c1e' : '#ffffff'; 
-        
-        // 创建用于导出的克隆
         const clone = previewEl.cloneNode(true);
         clone.classList.add('clone-hidden');
-        clone.classList.add('export-mode'); // 核心：注入阅读增强模式类
+        clone.classList.add('export-mode'); 
         clone.style.width = w + 'px';
         clone.style.background = exportBgColor; 
         clone.style.color = isDark ? '#f5f5f7' : '#1d1d1f';
         document.body.appendChild(clone);
-        
         await new Promise(r => setTimeout(r, 600));
-        const canvas = await html2canvas(clone, { 
-            scale: 3, 
-            useCORS: true, 
-            backgroundColor: exportBgColor 
-        });
-        
+        const canvas = await html2canvas(clone, { scale: 3, useCORS: true, backgroundColor: exportBgColor });
         const link = document.createElement('a');
-        link.download = 'MD2File_Image.png';
+        link.download = 'MD-Outputter_Image.png';
         link.href = canvas.toDataURL('image/png');
         link.click();
         document.body.removeChild(clone);
     }
-    
     function clearContent() { if(confirm(currentLang === 'zh' ? "确定清空内容？" : "Clear content?")) { inputEl.value = ""; update(); } }
     function checkCustom() { document.getElementById('custom-pdf').style.display = pdfSelect.value === 'custom' ? 'flex' : 'none'; }
     renderUI();
