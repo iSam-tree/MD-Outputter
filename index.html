@@ -78,9 +78,18 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.03);
         }
         .pane-head {
-            padding: 10px 16px; background: rgba(0,0,0,0.02); border-bottom: 1px solid var(--border);
+            padding: 8px 16px; background: rgba(0,0,0,0.02); border-bottom: 1px solid var(--border);
             font-size: 10px; font-weight: 700; color: var(--text-sec); letter-spacing: 1px;
+            display: flex; justify-content: space-between; align-items: center;
         }
+
+        /* 清空按钮样式 */
+        .clear-btn {
+            background: none; border: none; color: var(--accent); cursor: pointer;
+            font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px;
+            transition: background 0.2s;
+        }
+        .clear-btn:hover { background: rgba(0,122,255,0.1); }
 
         textarea {
             flex: 1; padding: 20px; border: none; resize: none; outline: none;
@@ -91,8 +100,7 @@
         #preview { 
             flex: 1; padding: 35px; overflow-y: auto; background: var(--pane-bg); 
             line-height: 1.8; color: var(--text); 
-            word-spacing: 0.05em; /* 优化中英文混排间距 */
-            word-break: break-word;
+            word-spacing: 0.05em; word-break: break-word;
         }
 
         @media (max-width: 850px) {
@@ -106,7 +114,6 @@
             textarea, #preview { font-size: 16px; }
         }
 
-        /* 渲染内容微调 */
         #preview h1 { border-bottom: 2px solid var(--border); padding-bottom: 12px; margin-top: 0; letter-spacing: 0.02em; }
         #preview code { background: rgba(0,0,0,0.05); padding: 2px 6px; border-radius: 4px; font-family: monospace; }
         [data-theme="dark"] #preview code { background: rgba(255,255,255,0.1); }
@@ -148,7 +155,10 @@
 
     <main class="content-area">
         <div class="pane">
-            <div class="pane-head" id="head-editor">编辑器</div>
+            <div class="pane-head">
+                <span id="head-editor">编辑器</span>
+                <button class="clear-btn" onclick="clearContent()" id="btn-clear">清空</button>
+            </div>
             <textarea id="input" oninput="update()" spellcheck="false"></textarea>
         </div>
         <div class="pane">
@@ -169,6 +179,7 @@
             pdfSize: "PDF 尺寸", exportPdf: "导出 PDF",
             imgSize: "图片 / 社媒尺寸", exportImg: "导出长图",
             editor: "编辑器", preview: "预览区", custom: "自定义...",
+            clear: "清空",
             pdfOptions: [
                 { val: "A4", text: "A4 打印纸 (210x297mm)" },
                 { val: "A5", text: "A5 手册 (148x210mm)" },
@@ -193,6 +204,7 @@
             pdfSize: "PDF SIZE", exportPdf: "Export PDF",
             imgSize: "IMAGE / SOCIAL SIZE", exportImg: "Export Image",
             editor: "EDITOR", preview: "PREVIEW", custom: "Custom...",
+            clear: "CLEAR",
             pdfOptions: [
                 { val: "A4", text: "A4 Paper (210x297mm)" },
                 { val: "A5", text: "A5 Leaflet (148x210mm)" },
@@ -243,6 +255,7 @@
         document.getElementById('btn-img').innerText = lang.exportImg;
         document.getElementById('head-editor').innerText = lang.editor;
         document.getElementById('head-preview').innerText = lang.preview;
+        document.getElementById('btn-clear').innerText = lang.clear;
         renderSelects();
         if (inputEl.value.trim() === "" || inputEl.value === oldDefault) {
             inputEl.value = lang.defaultText;
@@ -250,15 +263,19 @@
         }
     }
 
+    function clearContent() {
+        if(confirm(currentLang === 'zh' ? "确定要清空所有内容吗？" : "Are you sure you want to clear all content?")) {
+            inputEl.value = "";
+            update();
+        }
+    }
+
     function checkCustom() { document.getElementById('custom-pdf').style.display = pdfSelect.value === 'custom' ? 'flex' : 'none'; }
 
-    // 核心修正：保留标题内部空格，仅过滤非法字符
     function getName(ext, res) {
         const lines = inputEl.value.split('\n');
         const first = lines.find(l => l.trim()) || 'Untitled';
-        // 移除 Markdown 标记，保留普通空格
         let title = first.replace(/[#*`>]/g, '').trim();
-        // 过滤文件名非法字符 / \ ? % * : | " < >
         const safeTitle = title.replace(/[/\\?%*:|"<>]/g, '').substring(0, 30);
         return `${safeTitle}_${res}.${ext}`;
     }
@@ -270,15 +287,8 @@
         const h = sel === 'custom' ? document.getElementById('ph').value : pdfSizes[sel][1];
         const btn = document.getElementById('btn-pdf');
         btn.innerText = "...";
-        const opt = { 
-            margin: 10, 
-            filename: getName('pdf', `${w}x${h}mm`), 
-            image: { type: 'jpeg', quality: 0.98 }, 
-            html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' }, 
-            jsPDF: { unit: 'mm', format: [w, h], orientation: w > h ? 'l' : 'p' } 
-        };
-        try { await html2pdf().set(opt).from(previewEl).save(); } 
-        finally { btn.innerText = i18n[currentLang].exportPdf; }
+        const opt = { margin: 10, filename: getName('pdf', `${w}x${h}mm`), image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' }, jsPDF: { unit: 'mm', format: [w, h], orientation: w > h ? 'l' : 'p' } };
+        try { await html2pdf().set(opt).from(previewEl).save(); } finally { btn.innerText = i18n[currentLang].exportPdf; }
     }
 
     async function exportImage() {
@@ -298,10 +308,7 @@
             link.download = getName('png', `${w}px`);
             link.href = canvas.toDataURL();
             link.click();
-        } finally {
-            document.body.removeChild(clone);
-            btn.innerText = i18n[currentLang].exportImg;
-        }
+        } finally { document.body.removeChild(clone); btn.innerText = i18n[currentLang].exportImg; }
     }
 
     renderSelects();
